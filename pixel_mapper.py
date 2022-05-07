@@ -2,6 +2,22 @@ import numpy as np
 import cv2
 
 
+quad_coords = {
+    "lonlat": np.array([
+        [6.602018, 52.036769], # Third lampost top right
+        [6.603227, 52.036181], # Corner of white rumble strip top left
+        [6.603638, 52.036558], # Corner of rectangular road marking bottom left
+        [6.603560, 52.036730] # Corner of dashed line bottom right
+    ]),
+    "pixel": np.array([
+        [1200, 278], # Third lampost top right
+        [87, 328], # Corner of white rumble strip top left
+        [36, 583], # Corner of rectangular road marking bottom left
+        [1205, 698] # Corner of dashed line bottom right
+    ])
+}
+
+
 class PixelMapper(object):
     """
     Create an object for converting pixels to geographic coordinates,
@@ -60,3 +76,12 @@ class PixelMapper(object):
         pixel = np.dot(self.invM,lonlat.T)
         
         return (pixel[:2,:]/pixel[2,:]).T
+
+
+pm = PixelMapper(quad_coords["pixel"], quad_coords["lonlat"])
+
+uv_0 = (350, 370) # Top left give way sign in frame
+lonlat_0 = pm.pixel_to_lonlat(uv_0)
+
+lonlat_1 = (6.603361, 52.036639) # Center of the roundabout on googlemaps
+uv_1 = pm.lonlat_to_pixel(lonlat_1)
