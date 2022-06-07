@@ -15,23 +15,8 @@ def load_class_names(namesfile):
     return class_names
 
 
-def format_yolov5(source):
-    # put the image in square big enough
-    col, row, _ = source.shape
-    _max = max(col, row)
-    resized = np.zeros((_max, _max, 3), np.uint8)
-    resized[0:col, 0:row] = source
-
-    # resize to 640x640, normalize to [0,1[ and swap Red and Blue channels
-    result = cv2.dnn.blobFromImage(resized, 1 / 255.0, (640, 640), swapRB=True)
-
-    return result
-
-
 def detect_cv2_camera():
-    # Заграузка сети
-    # net = cv2.dnn.readNetFromDarknet(cfgfile, weightfile)
-    net = cv2.dnn.readNet('yolov5m.onnx')
+    net = cv2.dnn.readNet('yolov5s.onnx')
     ln = net.getLayerNames()
     ln = [ln[i - 1] for i in net.getUnconnectedOutLayers()]
     # Инициализируем трекер
@@ -40,6 +25,7 @@ def detect_cv2_camera():
     namesfile = 'coco.names'
     class_names = load_class_names(namesfile)
     # Камера
+    RTSP_URL = 'rtsp://administrator:PQRYgZpQcInNwrbOo7f9@192.168.0.48:554/stream1'
     cap = cv2.VideoCapture(0)
     # Генерим коробочкам разные цвета
     color_list = []
@@ -62,6 +48,7 @@ def detect_cv2_camera():
             boxes = []
             confidences = []
             classIDs = []
+
             for output in layerOutputs:
                 for detection in output:
                     scores = detection[5:]
@@ -78,6 +65,8 @@ def detect_cv2_camera():
 
             idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5,
                                     0.3)
+
+
 
             result_img = np.copy(img)
             dets = []
